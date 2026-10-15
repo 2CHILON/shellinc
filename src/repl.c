@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "lexer.h"
+#include "parser.h"
+
 #define PROMPT "shellinc> "
 #define INITIAL_CAP 128
 
@@ -59,6 +62,24 @@ static char *trim(char *s) {
     return s;
 }
 
+/* Temporary: shows what the parser understood, until the executor exists. */
+static void dump_pipeline(const Pipeline *p) {
+    for (size_t i = 0; i < p->count; i++) {
+        const Command *c = &p->cmds[i];
+        printf("[%lu]", (unsigned long)i);
+        for (size_t j = 0; j < c->argc; j++) {
+            printf(" <%s>", c->argv[j]);
+        }
+        if (c->in_file) {
+            printf("  in=%s", c->in_file);
+        }
+        if (c->out_file) {
+            printf("  out=%s%s", c->out_file, c->append ? " (append)" : "");
+        }
+        putchar('\n');
+    }
+}
+
 int repl_run(void) {
     for (;;) {
         printf(PROMPT);
@@ -82,7 +103,26 @@ int repl_run(void) {
             break;
         }
 
-        printf("shellinc: not implemented yet: %s\n", cmd);
+        TokenList tokens;
+        LexStatus ls = lex(cmd, &tokens);
+        if (ls != LEX_OK) {
+            fprintf(stderr, "shellinc: %s\n",
+                    ls == LEX_ERR_UNTERMINATED_QUOTE ? "unterminated quote"
+                                                     : "out of memory");
+            free(line);
+            continue;
+        }
+
+        Pipeline pipeline;
+        const char *err = NULL;
+        if (parse(&tokens, &pipeline, &err) != PARSE_OK) {
+            fprintf(stderr, "shellinc: syntax error: %s\n", err);
+        } else {
+            dump_pipeline(&pipeline);
+            pipeline_free(&pipeline);
+        }
+
+        token_list_free(&tokens);
         free(line);
     }
     return 0;
