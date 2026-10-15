@@ -5,10 +5,17 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(WIN32)
+  set(PLATFORM_SRC src/platform_win.c)
+else()
+  set(PLATFORM_SRC src/platform_posix.c)
+endif()
+
 add_library(shellcore STATIC
   src/lexer.c
   src/parser.c
   src/repl.c
+  ${PLATFORM_SRC}
 )
 target_include_directories(shellcore PUBLIC include)
 
