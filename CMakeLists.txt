@@ -5,12 +5,26 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(shellinc src/main.c src/repl.c)
-target_include_directories(shellinc PRIVATE include)
+add_library(shellcore STATIC
+  src/lexer.c
+  src/parser.c
+  src/repl.c
+)
+target_include_directories(shellcore PUBLIC include)
+
+add_executable(shellinc src/main.c)
+target_link_libraries(shellinc PRIVATE shellcore)
 target_compile_definitions(shellinc PRIVATE SHELLINC_VERSION="${PROJECT_VERSION}")
 
-if(MSVC)
-  target_compile_options(shellinc PRIVATE /W4)
-else()
-  target_compile_options(shellinc PRIVATE -Wall -Wextra -Wpedantic)
-endif()
+enable_testing()
+add_executable(test_lexer_parser tests/test_lexer_parser.c)
+target_link_libraries(test_lexer_parser PRIVATE shellcore)
+add_test(NAME lexer_parser COMMAND test_lexer_parser)
+
+foreach(tgt shellcore shellinc test_lexer_parser)
+  if(MSVC)
+    target_compile_options(${tgt} PRIVATE /W4)
+  else()
+    target_compile_options(${tgt} PRIVATE -Wall -Wextra -Wpedantic)
+  endif()
+endforeach()
