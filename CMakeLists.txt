@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(shellinc src/main.c)
+add_executable(shellinc src/main.c src/repl.c)
 target_include_directories(shellinc PRIVATE include)
 target_compile_definitions(shellinc PRIVATE SHELLINC_VERSION="${PROJECT_VERSION}")
 
