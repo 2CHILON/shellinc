@@ -9,10 +9,10 @@ typedef enum {
     TOK_REDIR_IN,
     TOK_REDIR_OUT,
     TOK_REDIR_APPEND
-} TokenType;
+} TokenKind;
 
 typedef struct {
-    TokenType type;
+    TokenKind type;
     char *text; /* only set for TOK_WORD, otherwise NULL */
 } Token;
 

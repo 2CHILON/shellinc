@@ -10,7 +10,7 @@ static int is_escapable(char c) {
     return is_space(c) || is_operator(c) || c == '\'' || c == '"' || c == '\\';
 }
 
-static int push(TokenList *list, size_t *cap, TokenType type, char *text) {
+static int push(TokenList *list, size_t *cap, TokenKind type, char *text) {
     if (list->count == *cap) {
         size_t new_cap = *cap ? *cap * 2 : 8;
         Token *tmp = realloc(list->items, new_cap * sizeof *tmp);
@@ -86,7 +86,7 @@ LexStatus lex(const char *line, TokenList *out) {
     out->count = 0;
 
     while (*p) {
-        TokenType type;
+        TokenKind type;
         char *text = NULL;
 
         if (is_space(*p)) {
