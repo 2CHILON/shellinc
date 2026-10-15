@@ -15,7 +15,7 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Run
-        run: ./build/shellinc
+        run: printf 'exit\n' | ./build/shellinc
 
   build-windows:
     runs-on: windows-latest
@@ -36,4 +36,4 @@ jobs:
       - name: Build
         run: cmake --build build
       - name: Run
-        run: ./build/shellinc.exe
+        run: printf 'exit\n' | ./build/shellinc.exe
