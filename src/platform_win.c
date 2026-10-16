@@ -6,8 +6,8 @@
 
 #include <windows.h>
 
-static void report(const char *what, DWORD err) {
-    char msg[256];
+static const char *win_error_text(DWORD err) {
+    static char msg[256];
     DWORD n = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                              NULL, err, 0, msg, (DWORD)sizeof msg, NULL);
     if (n == 0) {
@@ -19,7 +19,11 @@ static void report(const char *what, DWORD err) {
         }
         msg[n] = '\0';
     }
-    fprintf(stderr, "shellinc: %s: %s\n", what, msg);
+    return msg;
+}
+
+static void report(const char *what, DWORD err) {
+    fprintf(stderr, "shellinc: %s: %s\n", what, win_error_text(err));
 }
 
 /* Appends arg to out using the quoting rules CreateProcess programs expect
@@ -254,4 +258,33 @@ int platform_run_pipeline(const Pipeline *p) {
 
     free(procs);
     return status;
+}
+
+const char *platform_chdir(const char *path) {
+    return SetCurrentDirectoryA(path) ? NULL : win_error_text(GetLastError());
+}
+
+const char *platform_getcwd(char *buf, size_t size) {
+    DWORD n = GetCurrentDirectoryA((DWORD)size, buf);
+    if (n == 0) {
+        return win_error_text(GetLastError());
+    }
+    if (n >= size) {
+        return "path too long";
+    }
+    return NULL;
+}
+
+const char *platform_setenv(const char *name, const char *value) {
+    return _putenv_s(name, value) == 0 ? NULL : "could not set variable";
+}
+
+/* On Windows, setting a variable to an empty value removes it. */
+const char *platform_unsetenv(const char *name) {
+    return _putenv_s(name, "") == 0 ? NULL : "could not unset variable";
+}
+
+const char *platform_home_dir(void) {
+    const char *home = getenv("USERPROFILE");
+    return (home && *home) ? home : NULL;
 }

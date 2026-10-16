@@ -139,3 +139,25 @@ int platform_run_pipeline(const Pipeline *p) {
     free(pids);
     return status;
 }
+
+
+const char *platform_chdir(const char *path) {
+    return chdir(path) == 0 ? NULL : strerror(errno);
+}
+
+const char *platform_getcwd(char *buf, size_t size) {
+    return getcwd(buf, size) ? NULL : strerror(errno);
+}
+
+const char *platform_setenv(const char *name, const char *value) {
+    return setenv(name, value, 1) == 0 ? NULL : strerror(errno);
+}
+
+const char *platform_unsetenv(const char *name) {
+    return unsetenv(name) == 0 ? NULL : strerror(errno);
+}
+
+const char *platform_home_dir(void) {
+    const char *home = getenv("HOME");
+    return (home && *home) ? home : NULL;
+}
