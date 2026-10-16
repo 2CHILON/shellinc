@@ -1,9 +1,11 @@
 #include "repl.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "builtins.h"
 #include "lexer.h"
 #include "parser.h"
 #include "platform.h"
@@ -63,10 +65,35 @@ static char *trim(char *s) {
     return s;
 }
 
+/* Runs a builtin inside the shell process, honoring > and >> redirection. */
+static int run_builtin(const Command *c, int last_status, int *quit) {
+    FILE *out = stdout;
+    BuiltinResult r;
+
+    if (c->out_file) {
+        out = fopen(c->out_file, c->append ? "a" : "w");
+        if (!out) {
+            fprintf(stderr, "shellinc: %s: %s\n", c->out_file, strerror(errno));
+            return 1;
+        }
+    }
+
+    r = builtin_run(c, out, last_status);
+
+    if (out != stdout) {
+        fclose(out);
+    }
+    if (r.exit_shell) {
+        *quit = 1;
+    }
+    return r.status;
+}
+
 int repl_run(void) {
     int last_status = 0;
+    int quit = 0;
 
-    for (;;) {
+    while (!quit) {
         printf(PROMPT);
         fflush(stdout);
 
@@ -81,11 +108,6 @@ int repl_run(void) {
         if (*cmd == '\0') {
             free(line);
             continue;
-        }
-
-        if (strcmp(cmd, "exit") == 0) {
-            free(line);
-            break;
         }
 
         TokenList tokens;
@@ -105,7 +127,11 @@ int repl_run(void) {
             fprintf(stderr, "shellinc: syntax error: %s\n", err);
             last_status = 2;
         } else {
-            last_status = platform_run_pipeline(&pipeline);
+            if (pipeline.count == 1 && builtin_is(pipeline.cmds[0].argv[0])) {
+                last_status = run_builtin(&pipeline.cmds[0], last_status, &quit);
+            } else {
+                last_status = platform_run_pipeline(&pipeline);
+            }
             pipeline_free(&pipeline);
         }
 

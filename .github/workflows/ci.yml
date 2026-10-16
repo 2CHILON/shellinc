@@ -16,8 +16,8 @@ jobs:
         run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
-      - name: Run
-        run: printf 'exit\n' | ./build/shellinc
+      - name: Smoke test
+        run: printf 'echo hello\nexit 0\n' | ./build/shellinc | grep hello
 
   build-windows:
     runs-on: windows-latest
@@ -39,5 +39,5 @@ jobs:
         run: cmake --build build
       - name: Test
         run: ctest --test-dir build --output-on-failure
-      - name: Run
-        run: printf 'exit\n' | ./build/shellinc.exe
+      - name: Smoke test
+        run: printf 'echo hello\nexit 0\n' | ./build/shellinc.exe | grep hello
