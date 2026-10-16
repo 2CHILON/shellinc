@@ -15,7 +15,7 @@
 
 /* Reads one line of any length from stdin.
  * Returns a malloc'd string without the trailing newline (caller frees),
- * or NULL on end-of-input or allocation failure. */
+ * or NULL on end-of-input, an interrupted read (Ctrl+C), or allocation failure. */
 static char *read_line(void) {
     size_t cap = INITIAL_CAP;
     size_t len = 0;
@@ -46,6 +46,10 @@ static char *read_line(void) {
         }
     }
 
+    if (ferror(stdin)) { /* interrupted or failed: never run half a line */
+        free(buf);
+        return NULL;
+    }
     if (len > 0) { /* last line had no trailing newline */
         return buf;
     }
@@ -93,13 +97,22 @@ int repl_run(void) {
     int last_status = 0;
     int quit = 0;
 
+    platform_init_signals();
+
     while (!quit) {
         printf(PROMPT);
         fflush(stdout);
 
+        platform_take_interrupt(0); /* forget a Ctrl+C meant for the previous command */
         char *line = read_line();
-        if (!line) { /* Ctrl+D / Ctrl+Z / closed stdin */
-            putchar('\n');
+        if (!line) {
+            if (platform_take_interrupt(1)) { /* Ctrl+C at the prompt */
+                clearerr(stdin);
+                putchar('\n');
+                last_status = 130;
+                continue;
+            }
+            putchar('\n'); /* Ctrl+D / Ctrl+Z / closed stdin */
             break;
         }
 

@@ -246,14 +246,26 @@ int platform_run_pipeline(const Pipeline *p) {
         CloseHandle(prev_read);
     }
 
-    for (size_t i = 0; i < started; i++) {
-        WaitForSingleObject(procs[i], INFINITE);
-        if (last_started && i == started - 1) {
+    {
+        const DWORD ctrl_c_exit = 0xC000013AUL; /* exit code of a process stopped by Ctrl+C */
+        int interrupted = 0;
+
+        for (size_t i = 0; i < started; i++) {
             DWORD code = 0;
+
+            WaitForSingleObject(procs[i], INFINITE);
             GetExitCodeProcess(procs[i], &code);
-            status = (int)code;
+            if (code == ctrl_c_exit) {
+                interrupted = 1;
+            }
+            if (last_started && i == started - 1) {
+                status = (code == ctrl_c_exit) ? 130 : (int)code;
+            }
+            CloseHandle(procs[i]);
         }
-        CloseHandle(procs[i]);
+        if (interrupted) { /* the console echoes ^C but leaves the cursor on the line */
+            putchar('\n');
+        }
     }
 
     free(procs);
@@ -287,4 +299,35 @@ const char *platform_unsetenv(const char *name) {
 const char *platform_home_dir(void) {
     const char *home = getenv("USERPROFILE");
     return (home && *home) ? home : NULL;
+}
+
+static volatile LONG g_interrupted = 0;
+
+/* Runs on a separate thread created by the system. Returning TRUE tells
+ * Windows the event is handled, so the shell is not terminated. Child
+ * processes do not inherit this handler and still exit on Ctrl+C. */
+static BOOL WINAPI console_handler(DWORD type) {
+    if (type == CTRL_C_EVENT || type == CTRL_BREAK_EVENT) {
+        InterlockedExchange(&g_interrupted, 1);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+void platform_init_signals(void) {
+    SetConsoleCtrlHandler(console_handler, TRUE);
+}
+
+int platform_take_interrupt(int wait) {
+    int tries = wait ? 10 : 1;
+
+    for (int i = 0; i < tries; i++) {
+        if (InterlockedExchange(&g_interrupted, 0)) {
+            return 1;
+        }
+        if (i + 1 < tries) {
+            Sleep(10); /* the handler thread may not have run yet */
+        }
+    }
+    return 0;
 }
