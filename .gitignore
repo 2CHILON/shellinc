@@ -26,3 +26,4 @@ Thumbs.db
 
 build-debug/
 build-debug/
+echo "installer/output/" >> .gitignore
