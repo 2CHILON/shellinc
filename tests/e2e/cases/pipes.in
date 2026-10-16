@@ -1,0 +1,3 @@
+si_tool args a b | si_tool cat | si_tool cat
+si_tool args x | si_tool exit 5
+echo $?

@@ -1,0 +1,10 @@
+export GREETING=hello
+si_tool args $GREETING "$GREETING world" '$GREETING' \$GREETING
+si_tool args $E2E_UNSET_VAR end
+si_tool args "$E2E_UNSET_VAR" end
+si_tool args "cost: $5" ${GREETING}ing
+si_tool getenv GREETING
+unset GREETING
+si_tool getenv GREETING
+export E2E_A=1 E2E_B=2
+si_tool getenv E2E_B

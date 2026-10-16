@@ -1,0 +1,6 @@
+echo "unterminated
+echo ok
+ls |
+echo $?
+| si_tool cat
+echo $?

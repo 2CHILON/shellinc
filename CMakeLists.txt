@@ -26,6 +26,7 @@ target_compile_definitions(shellinc PRIVATE SHELLINC_VERSION="${PROJECT_VERSION}
 
 enable_testing()
 
+# Unit tests
 add_executable(test_lexer_parser tests/test_lexer_parser.c)
 target_link_libraries(test_lexer_parser PRIVATE shellcore)
 add_test(NAME lexer_parser COMMAND test_lexer_parser)
@@ -38,7 +39,23 @@ add_executable(test_expansion tests/test_expansion.c)
 target_link_libraries(test_expansion PRIVATE shellcore)
 add_test(NAME expansion COMMAND test_expansion)
 
-foreach(tgt shellcore shellinc test_lexer_parser test_builtins test_expansion)
+# End-to-end tests: every tests/e2e/cases/NAME.in becomes a test named e2e_NAME
+add_executable(si_tool tests/helpers/si_tool.c)
+
+file(GLOB E2E_INPUTS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tests/e2e/cases/*.in")
+foreach(input ${E2E_INPUTS})
+  get_filename_component(case_name "${input}" NAME_WE)
+  get_filename_component(case_dir "${input}" DIRECTORY)
+  add_test(NAME e2e_${case_name}
+    COMMAND ${CMAKE_COMMAND}
+      -DSHELLINC_EXE=$<TARGET_FILE:shellinc>
+      -DTOOL_DIR=$<TARGET_FILE_DIR:si_tool>
+      -DCASE=${case_dir}/${case_name}
+      -P ${CMAKE_SOURCE_DIR}/tests/e2e/run_case.cmake)
+  set_tests_properties(e2e_${case_name} PROPERTIES TIMEOUT 60)
+endforeach()
+
+foreach(tgt shellcore shellinc test_lexer_parser test_builtins test_expansion si_tool)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
   else()

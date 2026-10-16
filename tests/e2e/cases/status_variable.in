@@ -1,0 +1,17 @@
+si_tool exit 7
+echo $?
+si_tool exit 0
+echo $?
+nosuchcommand_xyz
+echo $?
+nosuchcommand_xyz
+exit $?
+
+si_tool exit 7
+echo $?
+si_tool exit 0
+echo $?
+nosuchcommand_xyz
+echo $?
+nosuchcommand_xyz
+exit $?

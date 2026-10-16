@@ -1,0 +1,7 @@
+si_tool mkdir sub
+cd sub
+si_tool cwdname
+cd ..
+si_tool cwdname
+cd does_not_exist
+echo $?
