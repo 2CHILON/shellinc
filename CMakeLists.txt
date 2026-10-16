@@ -34,7 +34,11 @@ add_executable(test_builtins tests/test_builtins.c)
 target_link_libraries(test_builtins PRIVATE shellcore)
 add_test(NAME builtins COMMAND test_builtins)
 
-foreach(tgt shellcore shellinc test_lexer_parser test_builtins)
+add_executable(test_expansion tests/test_expansion.c)
+target_link_libraries(test_expansion PRIVATE shellcore)
+add_test(NAME expansion COMMAND test_expansion)
+
+foreach(tgt shellcore shellinc test_lexer_parser test_builtins test_expansion)
   if(MSVC)
     target_compile_options(${tgt} PRIVATE /W4)
   else()

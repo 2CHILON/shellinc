@@ -111,7 +111,8 @@ int repl_run(void) {
         }
 
         TokenList tokens;
-        LexStatus ls = lex(cmd, &tokens);
+        ExpandContext ctx = {last_status, platform_home_dir()};
+        LexStatus ls = lex_expand(cmd, &ctx, &tokens);
         if (ls != LEX_OK) {
             fprintf(stderr, "shellinc: %s\n",
                     ls == LEX_ERR_UNTERMINATED_QUOTE ? "unterminated quote"
