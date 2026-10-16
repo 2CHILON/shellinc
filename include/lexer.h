@@ -27,8 +27,19 @@ typedef enum {
     LEX_ERR_NOMEM
 } LexStatus;
 
-/* Splits a line into tokens. On failure, out is left empty. */
+/* Values needed to expand $? and ~. */
+typedef struct {
+    int last_status;  /* value of $? */
+    const char *home; /* value of ~, or NULL to leave ~ unexpanded */
+} ExpandContext;
+
+/* Splits a line into tokens without any expansion.
+ * On failure, out is left empty. */
 LexStatus lex(const char *line, TokenList *out);
+
+/* Same as lex(), but also expands $NAME, ${NAME}, $? and a leading ~
+ * according to the quoting rules. A NULL ctx disables expansion. */
+LexStatus lex_expand(const char *line, const ExpandContext *ctx, TokenList *out);
 
 void token_list_free(TokenList *list);
 

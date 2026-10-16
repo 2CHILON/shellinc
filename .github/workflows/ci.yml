@@ -17,7 +17,7 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Smoke test
-        run: printf 'echo hello\nexit 0\n' | ./build/shellinc | grep hello
+        run: printf 'export SMOKE=expanded42\necho $SMOKE\nexit 0\n' | ./build/shellinc | grep expanded42
 
   build-windows:
     runs-on: windows-latest
@@ -40,4 +40,4 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Smoke test
-        run: printf 'echo hello\nexit 0\n' | ./build/shellinc.exe | grep hello
+        run: printf 'export SMOKE=expanded42\necho $SMOKE\nexit 0\n' | ./build/shellinc.exe | grep expanded42
