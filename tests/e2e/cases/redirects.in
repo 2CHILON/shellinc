@@ -1,0 +1,9 @@
+si_tool args one two > args.txt
+si_tool cat < args.txt
+si_tool args three >> args.txt
+si_tool cat < args.txt
+echo builtin > b.txt
+si_tool cat < b.txt
+echo more >> b.txt
+si_tool cat < b.txt
+

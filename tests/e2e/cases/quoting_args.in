@@ -1,0 +1,6 @@
+si_tool args "two words" 'single quoted' plain ""
+si_tool args a\ b
+si_tool args "say \"hi\""
+si_tool args 'C:\Program Files\x'
+si_tool args 'C:\dir with space\'
+si_tool args C:\plain\path

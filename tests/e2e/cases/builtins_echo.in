@@ -1,0 +1,6 @@
+
+echo hello world
+echo "a  b" 'c d'e
+echo -n no newline
+echo
+exit
