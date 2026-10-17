@@ -38,6 +38,7 @@ Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayIcon={app}\shellinc.exe
+SetupIconFile=..\assets\icon\shellinc.ico
 
 [Tasks]
 Name: "addtopath"; Description: "Add shellinc to my PATH (so I can type 'shellinc' in any terminal)"; GroupDescription: "Optional:"

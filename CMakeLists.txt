@@ -24,6 +24,16 @@ add_executable(shellinc src/main.c)
 target_link_libraries(shellinc PRIVATE shellcore)
 target_compile_definitions(shellinc PRIVATE SHELLINC_VERSION="${PROJECT_VERSION}")
 
+if(WIN32)
+  # Embed the icon and version information (compiled with windres on MinGW).
+  enable_language(RC)
+  set(SHELLINC_RC ${CMAKE_CURRENT_BINARY_DIR}/shellinc.rc)
+  configure_file(resources/shellinc.rc.in ${SHELLINC_RC} @ONLY)
+  set_source_files_properties(${SHELLINC_RC} PROPERTIES
+    OBJECT_DEPENDS ${CMAKE_SOURCE_DIR}/assets/icon/shellinc.ico)
+  target_sources(shellinc PRIVATE ${SHELLINC_RC})
+endif()
+
 enable_testing()
 
 # Unit tests
