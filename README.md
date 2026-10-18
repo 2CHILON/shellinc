@@ -68,7 +68,7 @@ An example session on Linux:
 
 ```text
 $ shellinc
-shellinc 0.1.0
+shellinc 0.1.1
 shellinc> export GREETING=hello
 shellinc> echo "$GREETING from shellinc"
 hello from shellinc
