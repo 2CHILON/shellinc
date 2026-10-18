@@ -59,7 +59,7 @@ The project is deliberately compact and readable, so it doubles as a reference f
 - **Proper exit statuses:** `127` for command not found, `130` after Ctrl+C, and the status of the last command in a pipeline
 - **Ctrl+C that works:** it interrupts the running command, not the shell
 - **Native on both platforms:** POSIX (`fork`, `exec`, `pipe`) on Linux, Win32 (`CreateProcess`, handles) on Windows
-- **Tested:** unit tests, 10 end-to-end scenarios, CI on Linux and Windows, and valgrind-clean on Linux
+- **Tested:** unit tests, 11 end-to-end scenarios, CI on Linux and Windows, and valgrind-clean on Linux
 - **Easy to install:** a Windows installer, a Windows zip, and a static Linux binary, each published with SHA-256 checksums
 
 ## Demo
@@ -213,6 +213,7 @@ Rules worth knowing:
 | `export NAME=value...` | Set environment variables for the shell and every program it starts. |
 | `unset NAME...` | Remove environment variables. |
 | `exit [n]` | Exit with status `n` (0–255). Without `n`, exit with the status of the last command. |
+| `clear` | Clear the screen (alias `cls`). Does nothing when output is not a terminal. |
 | `help` | List the builtins. |
 
 Builtins run inside the shell process, which is why `cd` and `export` can change the shell's own state. They honor `>` and `>>`. A builtin used inside a multi-command pipeline is looked up as an external program instead (see [limitations](#known-limitations-and-roadmap)).

@@ -331,3 +331,20 @@ int platform_take_interrupt(int wait) {
     }
     return 0;
 }
+
+void platform_clear_screen(void) {
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+
+    if (h == NULL || h == INVALID_HANDLE_VALUE || !GetConsoleMode(h, &mode)) {
+        return; /* not a console: redirected to a file or a pipe */
+    }
+    if (!(mode & 0x0004)) { /* ENABLE_VIRTUAL_TERMINAL_PROCESSING */
+        if (!SetConsoleMode(h, mode | 0x0004)) {
+            return;
+        }
+    }
+    fflush(stdout);
+    fputs("\033[H\033[2J\033[3J", stdout);
+    fflush(stdout);
+}

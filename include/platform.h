@@ -34,4 +34,8 @@ void platform_init_signals(void);
  * (Windows) waits a short moment for it. */
 int platform_take_interrupt(int wait);
 
+/* Clears the terminal screen and its scrollback. Does nothing when standard
+ * output is not a terminal. */
+void platform_clear_screen(void);
+
 #endif
