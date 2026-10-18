@@ -67,6 +67,8 @@ static void test_is_builtin(void) {
     CHECK(builtin_is("help"));
     CHECK(!builtin_is("ls"));
     CHECK(!builtin_is("git"));
+    CHECK(builtin_is("clear"));
+    CHECK(builtin_is("cls"));
 }
 
 static void test_echo(void) {
@@ -182,7 +184,20 @@ static void test_help(void) {
     CHECK(strstr(out, "cd") != NULL);
     CHECK(strstr(out, "exit") != NULL);
 }
+static void test_clear(void) {
+    char out[64];
+    BuiltinResult r;
 
+    /* output goes to a file here, so nothing is written and no screen is touched */
+    r = run("clear", out, sizeof out, 0);
+    CHECK(r.status == 0);
+    CHECK(!r.exit_shell);
+    CHECK(strcmp(out, "") == 0);
+
+    r = run("cls", out, sizeof out, 0);
+    CHECK(r.status == 0);
+    CHECK(strcmp(out, "") == 0);
+}
 int main(void) {
     test_is_builtin();
     test_echo();
@@ -190,6 +205,7 @@ int main(void) {
     test_env();
     test_cd_pwd();
     test_help();
+    test_clear();
 
     if (failures) {
         fprintf(stderr, "%d check(s) failed\n", failures);

@@ -145,8 +145,16 @@ static int bi_help(const Command *c, FILE *out) {
           "  export NAME=value  set an environment variable\n"
           "  unset NAME         remove an environment variable\n"
           "  exit [n]           exit the shell with status n\n"
+          "  clear              clear the screen (alias: cls)\n"
           "  help               show this message\n",
           out);
+    return 0;
+}
+static int bi_clear(const Command *c, FILE *out) {
+    (void)c;
+    if (out == stdout) { /* with "clear > file" there is nothing to clear */
+        platform_clear_screen();
+    }
     return 0;
 }
 
@@ -179,8 +187,8 @@ static const struct {
     const char *name;
     BuiltinFn fn;
 } table[] = {
-    {"cd", bi_cd},         {"pwd", bi_pwd},     {"echo", bi_echo}, {"export", bi_export},
-    {"unset", bi_unset},   {"help", bi_help},
+    {"cd", bi_cd},       {"pwd", bi_pwd},     {"echo", bi_echo},   {"export", bi_export},
+    {"unset", bi_unset}, {"help", bi_help},   {"clear", bi_clear}, {"cls", bi_clear},
 };
 
 int builtin_is(const char *name) {

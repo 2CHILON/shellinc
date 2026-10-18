@@ -195,3 +195,11 @@ const char *platform_home_dir(void) {
     const char *home = getenv("HOME");
     return (home && *home) ? home : NULL;
 }
+
+void platform_clear_screen(void) {
+    if (!isatty(STDOUT_FILENO)) {
+        return;
+    }
+    fputs("\033[H\033[2J\033[3J", stdout); /* home, clear screen, clear scrollback */
+    fflush(stdout);
+}
